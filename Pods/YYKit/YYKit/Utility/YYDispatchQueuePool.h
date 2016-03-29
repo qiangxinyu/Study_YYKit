@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init UNAVAILABLE_ATTRIBUTE;
 + (instancetype)new UNAVAILABLE_ATTRIBUTE;
 
-/**
+/**s
  Creates and returns a dispatch queue pool.
  @param name       The name of the pool.
  @param queueCount Maxmium queue count, should in range (1, 32).
@@ -35,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Pool's name.
 @property (nullable, nonatomic, readonly) NSString *name;
+@property (nonatomic, assign)NSInteger age UNAVAILABLE_ATTRIBUTE;
 
 /// Get a serial queue from pool.
 - (dispatch_queue_t)queue;

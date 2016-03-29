@@ -15,6 +15,7 @@
 #import "YYCGUtilities.h"
 #import "NSAttributedString+YYText.h"
 
+//判断是否 include 了 这个文件 避免重复导入
 #if __has_include("YYDispatchQueuePool.h")
 #import "YYDispatchQueuePool.h"
 #endif
@@ -37,7 +38,7 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
 
 
 @interface YYLabel() <YYTextDebugTarget, YYAsyncLayerDelegate> {
-    NSMutableAttributedString *_innerText; ///< nonnull
+    NSMutableAttributedString * _innerText; ///< nonnull
     YYTextLayout *_innerLayout;
     YYTextContainer *_innerContainer; ///< nonnull
     

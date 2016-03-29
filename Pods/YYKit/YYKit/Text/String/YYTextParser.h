@@ -24,14 +24,19 @@ NS_ASSUME_NONNULL_BEGIN
 @required
 /**
  When text is changed in YYTextView or YYLabel, this method will be called.
+ 当改变的文本是yytextview或yylabel，这个方法会被调用。
  
  @param text  The original attributed string. This method may parse the text and
  change the text attributes or content.
+ 原来的 string   这个方法可以分析文本和更改文本属性或内容。
  
  @param selectedRange  Current selected range in `text`.
  This method should correct the range if the text content is changed. If there's 
  no selected range (such as YYLabel), this value is NULL.
- 
+ 当前选择的范围`文本`。
+ 如果改变文本内容，该方法应正确的范围,这个方法可以返回 一个范围 
+ 没有选择的范围（如yylabel），这个值是null。
+ 如果“文本”在该方法中被修改，返回“是”，否则返回“不”。
  @return If the 'text' is modified in this method, returns `YES`, otherwise returns `NO`.
  */
 - (BOOL)parseText:(nullable NSMutableAttributedString *)text selectedRange:(nullable NSRangePointer)selectedRange;

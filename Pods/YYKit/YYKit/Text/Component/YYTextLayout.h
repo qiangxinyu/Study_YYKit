@@ -113,8 +113,9 @@ extern const CGSize YYTextContainerMaxSize;
 @required
 /**
  This method will called before layout is completed. The method should be thread-safe.
+ 此方法将在布局完成之前调用。该方法应该是线程安全的。
  @param lines     An array of YYTextLine.
- @param text      The full text.
+ @param text      The full text. 
  @param container The layout container.
  */
 - (void)modifyLines:(NSArray<YYTextLine *> *)lines fromText:(NSAttributedString *)text inContainer:(YYTextContainer *)container;

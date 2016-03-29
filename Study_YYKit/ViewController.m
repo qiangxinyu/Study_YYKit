@@ -9,6 +9,8 @@
 #import "ViewController.h"
 #import <YYKit/YYKit.h>
 
+#import "YYDispatchQueuePool.h"
+
 @interface ViewController ()
 
 @end
@@ -23,15 +25,13 @@
     YYLabel * label = [[YYLabel alloc]initWithFrame:self.view.bounds];
     [self.view addSubview:label];
     
-    
     NSMutableAttributedString * attString = [[NSMutableAttributedString alloc]initWithString:@"测试  测试"];
     label.font = [UIFont systemFontOfSize:13];
     attString.backgroundColor = [UIColor orangeColor];
     attString.color = [UIColor purpleColor];
     
     label.attributedText = attString;
-    
-    
+
 //    label.text = @"asdasd";
     
     

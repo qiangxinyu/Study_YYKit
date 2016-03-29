@@ -15,6 +15,7 @@
 		7A81C55C1C9C1235005260FB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7A81C55A1C9C1235005260FB /* LaunchScreen.storyboard */; };
 		7A81C5671C9C1235005260FB /* Study_YYKitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A81C5661C9C1235005260FB /* Study_YYKitTests.m */; };
 		7A81C5721C9C1235005260FB /* Study_YYKitUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A81C5711C9C1235005260FB /* Study_YYKitUITests.m */; };
+		7A82D40A1CAA363100350389 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A82D4091CAA363100350389 /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		7A81C56D1C9C1235005260FB /* Study_YYKitUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Study_YYKitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A81C5711C9C1235005260FB /* Study_YYKitUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Study_YYKitUITests.m; sourceTree = "<group>"; };
 		7A81C5731C9C1235005260FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7A82D4091CAA363100350389 /* libPods.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPods.a; path = "../../Library/Developer/Xcode/DerivedData/Build/Products/Debug-iphonesimulator/libPods.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A82D40A1CAA363100350389 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,6 +160,7 @@
 		AED5D184C10BA6ED8045C087 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7A82D4091CAA363100350389 /* libPods.a */,
 				1D9AF0A38A5473A4CC4E4E17 /* libPods.a */,
 			);
 			name = Frameworks;

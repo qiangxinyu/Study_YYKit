@@ -154,6 +154,19 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The technique to use for wrapping and truncating the label's text.
  Default is NSLineBreakByTruncatingTail.
+ 
+ NSLineBreakByWordWrapping = 0,
+ 以单词为单位换行，以单位为单位截断。
+ NSLineBreakByCharWrapping,
+ 以字符为单位换行，以字符为单位截断。
+ NSLineBreakByClipping,
+ 以单词为单位换行。以字符为单位截断。
+ NSLineBreakByTruncatingHead,
+ 以单词为单位换行。如果是单行，则开始部分有省略号。如果是多行，则中间有省略号，省略号后面有4个字符。
+ NSLineBreakByTruncatingTail,
+ 以单词为单位换行。无论是单行还是多行，都是末尾有省略号。
+ NSLineBreakByTruncatingMiddle,
+ 以单词为单位换行。无论是单行还是多行，都是中间有省略号，省略号后面只有2个字符。
  */
 @property (nonatomic) NSLineBreakMode lineBreakMode;
 
@@ -173,6 +186,8 @@ NS_ASSUME_NONNULL_BEGIN
  When `text` or `attributedText` is changed, the parser will be called to modify the text.
  It can be used to add code highlighting or emoticon replacement to text view. 
  The default value is nil.
+ 当 text 或者 attributedText 改变, 这个 解析器 将调用来修改文本，
+  它可以用来添加代码高亮或表情符号替换文本视图。
  
  See `YYTextParser` protocol for more information.
  */
@@ -182,53 +197,68 @@ NS_ASSUME_NONNULL_BEGIN
  The current text layout in text view. It can be used to query the text layout information.
  Set a new value to this property also replaces most properties in this label, such as `text`,
  `color`, `attributedText`, `lineBreakMode`, `textContainerPath`, `exclusionPaths` and so on.
+ 
+ 一个文本中的 当前布局， 可以用来查询文本布局信息。
+ 设置一个新值 也会应用到 label 中的多个属性，比如 `text`,
+ `color`, `attributedText`, `lineBreakMode`, `textContainerPath`, `exclusionPaths` 等
  */
 @property (nullable, nonatomic, strong) YYTextLayout *textLayout;
 
 
 #pragma mark - Configuring the Text Container
+#pragma mark - 配置             文本 容器
 ///=============================================================================
 /// @name Configuring the Text Container
 ///=============================================================================
 
 /**
  A UIBezierPath object that specifies the shape of the text frame. Default value is nil.
+ 一个 UIBezierPath 对象 在 text 的 frame 中指定一个形状， 默认是 nil
  */
 @property (nullable, nonatomic, copy) UIBezierPath *textContainerPath;
 
 /**
  An array of UIBezierPath objects representing the exclusion paths inside the
  receiver's bounding rectangle. Default value is nil.
+ 一个 UIBezierPath 对象的 数组，用来表示 矩形内的一堆形状
  */
 @property (nullable, nonatomic, copy) NSArray<UIBezierPath *> *exclusionPaths;
 
 /**
  The inset of the text container's layout area within the text view's content area.
  Default value is UIEdgeInsetsZero.
+ 一个text内容的 约束
  */
 @property (nonatomic) UIEdgeInsets textContainerInset;
 
 /**
  Whether the receiver's layout orientation is vertical form. Default is NO.
  It may used to display CJK text.
+ 接收机的布局定位是否垂直的形式。默认是否定的。
+ 它可以用来显示CJK文本。
  */
 @property (nonatomic, getter=isVerticalForm) BOOL verticalForm;
 
 /**
  The text line position modifier used to modify the lines' position in layout.
+ 用于修改布局中的线路位置的文本行位置调整。
  Default value is nil.
  See `YYTextLinePositionModifier` protocol for more information.
+ 
  */
 @property (nullable, nonatomic, copy) id<YYTextLinePositionModifier> linePositionModifier;
 
 /**
  The debug option to display CoreText layout result.
  The default value is [YYTextDebugOption sharedDebugOption].
+ 调试选项显示的一些布局的结果。
+ 默认值是[ yytextdebugoption shareddebugoption ]。
  */
 @property (nullable, nonatomic, copy) YYTextDebugOption *debugOption;
 
 
 #pragma mark - Getting the Layout Constraints
+#pragma mark - 获得布局约束
 ///=============================================================================
 /// @name Getting the Layout Constraints
 ///=============================================================================
@@ -241,6 +271,13 @@ NS_ASSUME_NONNULL_BEGIN
      specified by this property, the additional text is flowed to one or more new 
      lines, thereby increasing the height of the label. If the text is vertical 
      form, this value will match to text height.
+ 
+ 首选的最大宽度（分）为多行标签。
+ “讨论这个属性会影响布局约束时的大小
+ 适用于它。在布局中，如果文本超出了宽度
+ 此属性所指定的附加文本将流到一个或多个新的
+ 线，从而增加了标签的高度。如果文本是垂直的
+ 形式，这个值将与文本高度匹配。
  */
 @property (nonatomic) CGFloat preferredMaxLayoutWidth;
 
@@ -253,28 +290,38 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  When user tap the label, this action will be called (similar to tap gesture).
  The default value is nil.
+ 当用户点击这个action标签（类似于所谓的点击动作）。
+ 默认值是零。
  */
 @property (nullable, nonatomic, copy) YYTextAction textTapAction;
 
 /**
  When user long press the label, this action will be called (similar to long press gesture).
  The default value is nil.
+ 当用户长按标签时，这个动作将被称为（类似于长按手势）。
+ 默认值为零。
  */
 @property (nullable, nonatomic, copy) YYTextAction textLongPressAction;
 
 /**
  When user tap the highlight range of text, this action will be called.
  The default value is nil.
+ 当用户点击文本的高亮显示范围时，这个动作将被调用。
+ 默认值为零。
  */
 @property (nullable, nonatomic, copy) YYTextAction highlightTapAction;
 
 /**
  When user long press the highlight range of text, this action will be called.
  The default value is nil. 
+ 当用户长按文本的高亮范围时，这个动作将被调用。
+ 默认值为零。
  */
 @property (nullable, nonatomic, copy) YYTextAction highlightLongPressAction;
 
 
+
+#pragma mark - Configuring the Display Mode
 #pragma mark - Configuring the Display Mode
 ///=============================================================================
 /// @name Configuring the Display Mode
@@ -285,6 +332,9 @@ NS_ASSUME_NONNULL_BEGIN
  asynchronously on background threads. 
  
  The default value is `NO`.
+ 
+ 一个布尔值，该值指示布局和渲染代码是否在运行后台线程异步。
+ 默认值是“不”。
  */
 @property (nonatomic) BOOL displaysAsynchronously;
 
@@ -299,6 +349,14 @@ NS_ASSUME_NONNULL_BEGIN
  can not finished in a vsync time (1/60 second), the old content will be still kept
  for display. You may manually clear the content by set the layer.contents to nil 
  after you update the label's properties, or you can just set this property to YES.
+ 如果该值是是的，并且该层是异步的，那么它将
+ 集label.layer.contents零显示前。
+ 默认值是“是”。
+ 当异步显示启用时，该层的内容将被
+ 在后台渲染处理完成后进行更新。如果渲染过程
+ 不能在垂直同步完成（1 / 60秒），旧的内容仍将保持
+ 用于显示。你可以手动设置layer.contents零清除内容
+ 更新标签的属性后，或者您可以将此属性设置为“是”。
  */
 @property (nonatomic) BOOL clearContentsBeforeAsynchronouslyDisplay;
 
@@ -307,6 +365,9 @@ NS_ASSUME_NONNULL_BEGIN
  a fade animation on layer when the contents of layer changed. 
  
  The default value is `YES`.
+ 如果该值是是的，并且该层是异步的，那么它将增加
+ 层变化时的一个渐变动画。
+ 默认值是“是”。
  */
 @property (nonatomic) BOOL fadeOnAsynchronouslyDisplay;
 
@@ -315,6 +376,10 @@ NS_ASSUME_NONNULL_BEGIN
  of text become highlighted. 
  
  The default value is `YES`.
+ 
+ 如果值是肯定的，那么在一定范围内，它会在图层上添加一个渐变的动画
+ 文字变得突出。
+ 默认值是“是”。
  */
 @property (nonatomic) BOOL fadeOnHighlight;
 
@@ -326,6 +391,11 @@ NS_ASSUME_NONNULL_BEGIN
  
  @discussion If you control the label content only through "textLayout", then
  you may set this value to YES for higher performance.
+ 忽视共同的属性（如文本、字体、文字颜色、attributedtext…）和
+ 用“、”来显示内容。
+ 默认值是“不”。
+ @讨论如果你控制标签的内容只有通过“、”，然后
+ 您可以将此值设置为“是的更高性能。
  */
 @property (nonatomic) BOOL ignoreCommonProperties;
 
@@ -334,12 +404,18 @@ NS_ASSUME_NONNULL_BEGIN
  
  1. If you only need a UILabel alternative to display rich text and receive link touch event, 
     you do not need to adjust the display mode properties.
+ 如果你只需要一个UILabel替代显示丰富的文字和接收链路的触摸事件，
+ 您不需要调整显示模式属性。
  
  2. If you have performance issues, you may enable the asynchronous display mode
     by setting the `displaysAsynchronously` to YES.
+ 如果您有性能问题，您可以启用异步显示模式
+ 通过设置` displaysasynchronously `YES。
  
  3. If you want to get the highest performance, you should do text layout with
     `YYTextLayout` class in background thread. Here's an example:
+ 如果你想获得最高的性能，你应该做文本布局
+ ` yytextlayout `后台线程类。下面是一个例子：
     
     YYLabel *label = [YYLabel new];
     label.displaysAsynchronously = YES;
