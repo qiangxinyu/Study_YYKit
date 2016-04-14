@@ -20,6 +20,10 @@
 #import "YYDispatchQueuePool.h"
 #endif
 
+/**
+ *  获取一个 线程
+ *
+ */
 #ifdef YYDispatchQueuePool_h
 static dispatch_queue_t YYLabelGetReleaseQueue() {
     return YYDispatchQueueGetForQOS(NSQualityOfServiceUtility);
@@ -77,6 +81,7 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
 #pragma mark - Private
 
 - (void)_updateIfNeeded {
+    //如果布局需要更新
     if (_state.layoutNeedUpdate) {
         _state.layoutNeedUpdate = NO;
         [self _updateLayout];
@@ -84,10 +89,12 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     }
 }
 
+//更新  YYTextLayout
 - (void)_updateLayout {
     _innerLayout = [YYTextLayout layoutWithContainer:_innerContainer text:_innerText];
     _shrinkInnerLayout = [YYLabel _shrinkLayoutWithLayout:_innerLayout];
 }
+
 
 - (void)_setLayoutNeedUpdate {
     _state.layoutNeedUpdate = YES;
@@ -99,11 +106,13 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     [self.layer setNeedsDisplay];
 }
 
+//释放 _innerLayout
 - (void)_clearInnerLayout {
     if (!_innerLayout) return;
     YYTextLayout *layout = _innerLayout;
     _innerLayout = nil;
     _shrinkInnerLayout = nil;
+    //后台 释放对象
     dispatch_async(YYLabelGetReleaseQueue(), ^{
         NSAttributedString *text = [layout text]; // capture to block and release in background
         if (layout.attachments.count) {
@@ -122,23 +131,39 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     return _shrinkHighlightLayout ? _shrinkHighlightLayout : _highlightLayout;
 }
 
+/**
+ *  重新 设置 _shrinkLayout
+ *
+ *  @param layout _innerLayout
+ *
+ *  @return YYTextLayout
+ */
 + (YYTextLayout *)_shrinkLayoutWithLayout:(YYTextLayout *)layout {
+    
     if (layout.text.length && layout.lines.count == 0) {
+        
         YYTextContainer *container = layout.container.copy;
         container.maximumNumberOfRows = 1;
+        
         CGSize containerSize = container.size;
+        //如果  垂直  高度值为  最大
         if (!container.verticalForm) {
             containerSize.height = YYTextContainerMaxSize.height;
         } else {
             containerSize.width = YYTextContainerMaxSize.width;
         }
         container.size = containerSize;
+        //
         return [YYTextLayout layoutWithContainer:container text:layout.text];
     } else {
         return nil;
     }
 }
 
+
+/**
+ *  启动  长按计时器   如果超过0.5秒 就成为 长按
+ */
 - (void)_startLongPressTimer {
     [_longPressTimer invalidate];
     _longPressTimer = [NSTimer timerWithTimeInterval:kLongPressMinimumDuration
@@ -149,26 +174,40 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     [[NSRunLoop currentRunLoop] addTimer:_longPressTimer forMode:NSRunLoopCommonModes];
 }
 
+/**
+ *  挂起 长按 计时器
+ */
 - (void)_endLongPressTimer {
     [_longPressTimer invalidate];
     _longPressTimer = nil;
 }
 
+/**
+ *  长按 计时器 调用的方法
+ */
 - (void)_trackDidLongPress {
     [self _endLongPressTimer];
+    
     if (_state.hasLongPressAction && _textLongPressAction) {
+    
         NSRange range = NSMakeRange(NSNotFound, 0);
         CGRect rect = CGRectNull;
+        
         CGPoint point = [self _convertPointToLayout:_touchBeganPoint];
+        
         YYTextRange *textRange = [self._innerLayout textRangeAtPoint:point];
+        
         CGRect textRect = [self._innerLayout rectForRange:textRange];
         textRect = [self _convertRectFromLayout:textRect];
         if (textRange) {
             range = textRange.asRange;
             rect = textRect;
         }
+        //长按的回调
         _textLongPressAction(self, _innerText, range, rect);
     }
+    
+    //如果长按的是  高亮的地方
     if (_highlight) {
         YYTextAction longPressAction = _highlight.longPressAction ? _highlight.longPressAction : _highlightLongPressAction;
         if (longPressAction) {
@@ -227,6 +266,7 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     }
 }
 
+//隐藏高亮
 - (void)_hideHighlightAnimated:(BOOL)animated {
     if (_state.showingHighlight) {
         _state.showingHighlight = NO;
@@ -234,7 +274,7 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
         [self _setLayoutNeedRedraw];
     }
 }
-
+//移除高亮
 - (void)_removeHighlightAnimated:(BOOL)animated {
     [self _hideHighlightAnimated:animated];
     _highlight = nil;
@@ -242,20 +282,38 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     _shrinkHighlightLayout = nil;
 }
 
+//结束 手势
 - (void)_endTouch {
     [self _endLongPressTimer];
     [self _removeHighlightAnimated:YES];
     _state.trackingTouch = NO;
 }
 
+/**
+ *  坐标转换
+ *
+ *  @param point 手指的点在 self 上的坐标
+ *
+ *  @return
+ */
 - (CGPoint)_convertPointToLayout:(CGPoint)point {
+    
     CGSize boundingSize = self._innerLayout.textBoundingSize;
+    //如果 开启了垂直
     if (self._innerLayout.container.isVerticalForm) {
         CGFloat w = self._innerLayout.textBoundingSize.width;
-        if (w < self.bounds.size.width) w = self.bounds.size.width;
+        
+        if (w < self.bounds.size.width) {
+            w = self.bounds.size.width;
+        }
+        
+        //上对齐
         point.x += self._innerLayout.container.size.width - w;
+        
+        
         if (_textVerticalAlignment == YYTextVerticalAlignmentCenter) {
             point.x += (self.bounds.size.width - boundingSize.width) * 0.5;
+            //下对齐
         } else if (_textVerticalAlignment == YYTextVerticalAlignmentBottom) {
             point.x += (self.bounds.size.width - boundingSize.width);
         }
@@ -314,9 +372,10 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     if (!_shadowColor || _shadowBlurRadius < 0) return nil;
     NSShadow *shadow = [NSShadow new];
     shadow.shadowColor = _shadowColor;
+    //在程序中执行
 #if !TARGET_INTERFACE_BUILDER
     shadow.shadowOffset = _shadowOffset;
-#else
+#else // 再 IB 中执行
     shadow.shadowOffset = CGSizeMake(_shadowOffset.x, _shadowOffset.y);
 #endif
     shadow.shadowBlurRadius = _shadowBlurRadius;
@@ -374,6 +433,9 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     [self _updateOuterLineBreakMode];
 }
 
+/**
+ *  清除layer的内容
+ */
 - (void)_clearContents {
     CGImageRef image = (__bridge_retained CGImageRef)(self.layer.contents);
     self.layer.contents = nil;
@@ -385,9 +447,14 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
 }
 
 - (void)_initLabel {
+    //关闭异步绘制
     ((YYAsyncLayer *)self.layer).displaysAsynchronously = NO;
+    
+    
     self.layer.contentsScale = [UIScreen mainScreen].scale;
+    
     self.contentMode = UIViewContentModeRedraw;
+    
     
     _attachmentViews = [NSMutableArray new];
     _attachmentLayers = [NSMutableArray new];
@@ -395,15 +462,18 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     _debugOption = [YYTextDebugOption sharedDebugOption];
     [YYTextDebugOption addDebugTarget:self];
     
+    
     _font = [self _defaultFont];
     _textColor = [UIColor blackColor];
     _textVerticalAlignment = YYTextVerticalAlignmentCenter;
     _numberOfLines = 1;
     _lineBreakMode = NSLineBreakByTruncatingTail;
     _innerText = [NSMutableAttributedString new];
+    
     _innerContainer = [YYTextContainer new];
-    _innerContainer.truncationType = YYTextTruncationTypeEnd;
+    _innerContainer.truncationType = YYTextTruncationTypeEnd;  //截断的 机制
     _innerContainer.maximumNumberOfRows = _numberOfLines;
+    
     _clearContentsBeforeAsynchronouslyDisplay = YES;
     _fadeOnAsynchronouslyDisplay = YES;
     _fadeOnHighlight = YES;
@@ -414,12 +484,11 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
 #pragma mark - Override
 
 - (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:CGRectZero];
-    if (!self) return nil;
-    self.backgroundColor = [UIColor clearColor];
-    self.opaque = NO;
-    [self _initLabel];
-    self.frame = frame;
+    if ([super initWithFrame:frame]) {
+        self.backgroundColor = [UIColor clearColor];
+        self.opaque = NO; //不透明 设置为 NO
+        [self _initLabel];
+    }
     return self;
 }
 
@@ -433,17 +502,24 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
 }
 
 - (void)setFrame:(CGRect)frame {
+    
     CGSize oldSize = self.bounds.size;
     [super setFrame:frame];
     CGSize newSize = self.bounds.size;
+    
+    //如果不一样  对布局属性进行改变
     if (!CGSizeEqualToSize(oldSize, newSize)) {
-        _innerContainer.size = self.bounds.size;
+        _innerContainer.size = self.bounds.size; //改变_innerContainer
+        //如果没有忽视 共有的属性
         if (!_ignoreCommonProperties) {
             _state.layoutNeedUpdate = YES;
         }
+        
+        //如果是异步绘制  并且清除垂直同步失败的旧画面
         if (_displaysAsynchronously && _clearContentsBeforeAsynchronouslyDisplay) {
             [self _clearContents];
         }
+        
         [self _setLayoutNeedRedraw];
     }
 }
@@ -465,16 +541,23 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
+    //如果忽略 公共的属性
     if (_ignoreCommonProperties) {
+        //直接 返回 layout 里面 计算的 size
         return _innerLayout.textBoundingSize;
     }
     
+    // !垂直分布
     if (!_verticalForm && size.width <= 0) size.width = YYTextContainerMaxSize.width;
+    // 垂直分布
     if (_verticalForm && size.height <= 0) size.height = YYTextContainerMaxSize.height;
     
+    //如果 跟 原来的 一样
     if ((!_verticalForm && size.width == self.bounds.size.width) ||
         (_verticalForm && size.height == self.bounds.size.height)) {
+        
         [self _updateIfNeeded];
+        
         YYTextLayout *layout = self._innerLayout;
         BOOL contains = NO;
         if (layout.container.maximumNumberOfRows == 0) {
@@ -646,9 +729,12 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
 - (void)setText:(NSString *)text {
     if (_text == text || [_text isEqualToString:text]) return;
     _text = text.copy;
+    
     BOOL needAddAttributes = _innerText.length == 0 && text.length > 0;
     [_innerText replaceCharactersInRange:NSMakeRange(0, _innerText.length) withString:text ? text : @""];
+    
     [_innerText removeDiscontinuousAttributesInRange:NSMakeRange(0, _innerText.length)];
+    //如果需要 添加 属性
     if (needAddAttributes) {
         _innerText.font = _font;
         _innerText.color = _textColor;
@@ -660,6 +746,7 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
             case NSLineBreakByClipping: {
                 _innerText.lineBreakMode = _lineBreakMode;
             } break;
+                
             case NSLineBreakByTruncatingHead:
             case NSLineBreakByTruncatingTail:
             case NSLineBreakByTruncatingMiddle: {
@@ -668,16 +755,24 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
             default: break;
         }
     }
+    
     if ([_textParser parseText:_innerText selectedRange:NULL]) {
         [self _updateOuterTextProperties];
     }
+    
+    //如果 没有忽略 公共属性
     if (!_ignoreCommonProperties) {
+        //如果是 异步绘制，并且掉帧 时  情况 内容
         if (_displaysAsynchronously && _clearContentsBeforeAsynchronouslyDisplay) {
             [self _clearContents];
         }
+        //更新 Layout
         [self _setLayoutNeedUpdate];
+        //结束手势
         [self _endTouch];
+        //当有任何会影响这个Label内容大小的事件发生时，我们应该调用invalidateIntrinsicContentSize：
         [self invalidateIntrinsicContentSize];
+        
     }
 }
 
@@ -687,8 +782,12 @@ static dispatch_queue_t YYLabelGetReleaseQueue() {
     }
     if (_font == font || [_font isEqual:font]) return;
     _font = font;
+    
     _innerText.font = _font;
+    
+    //如果没有 忽略 公共属性
     if (_innerText.length && !_ignoreCommonProperties) {
+        //如果是 异步绘制，并且掉帧 时  情况 内容
         if (_displaysAsynchronously && _clearContentsBeforeAsynchronouslyDisplay) {
             [self _clearContents];
         }

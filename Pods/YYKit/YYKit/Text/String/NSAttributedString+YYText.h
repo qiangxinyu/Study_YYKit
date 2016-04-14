@@ -1398,6 +1398,10 @@ NS_ASSUME_NONNULL_BEGIN
  See `allDiscontinuousAttributeKeys`.
  
  @param range A text range.
+ 
+
+ *  移除 不连续的 属性
+ 
  */
 - (void)removeDiscontinuousAttributesInRange:(NSRange)range;
 
@@ -1406,6 +1410,10 @@ NS_ASSUME_NONNULL_BEGIN
  
  @discussion These attributes can only set to a specified range of text, and
  should not extend to other range when editing text.
+ 返回所有连续属性的键，如rundelegate /附件/红宝石。
+ 讨论这些属性只能设置为一个指定的文本范围，并且
+ 编辑文本时不应延伸到其他范围。
+ 
  */
 + (NSArray<NSString *> *)allDiscontinuousAttributeKeys;
 

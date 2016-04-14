@@ -26,6 +26,13 @@ static inline dispatch_queue_priority_t NSQualityOfServiceToDispatchPriority(NSQ
     }
 }
 
+/**
+ *  创建一个 qos_class_t 也就是 dispatch_qos_class_t
+ *
+ *  @param qos 线程类型
+ *
+ *  @return 返回一个 qos_class_t
+ */
 static inline qos_class_t NSQualityOfServiceToQOSClass(NSQualityOfService qos) {
     switch (qos) {
         case NSQualityOfServiceUserInteractive: return QOS_CLASS_USER_INTERACTIVE;
@@ -39,24 +46,43 @@ static inline qos_class_t NSQualityOfServiceToQOSClass(NSQualityOfService qos) {
 
 typedef struct {
     const char *name;
-    void **queues;
+    void **queues;  //一个放 队列 的 数组
     uint32_t queueCount;
     int32_t counter;
 } YYDispatchContext;
 
+/**
+ *  创建 一个 YYDispatchContext 对象
+ *
+ *  @param name       队列的名字
+ *  @param queueCount 队列数量
+ *  @param qos        队列类型
+ *
+ *  @return YYDispatchContext
+ */
 static YYDispatchContext *YYDispatchContextCreate(const char *name,
                                                  uint32_t queueCount,
                                                  NSQualityOfService qos) {
+    
     YYDispatchContext *context = calloc(1, sizeof(YYDispatchContext));
+    
+    
     if (!context) return NULL;
+    
+    //分配 queueCount 个连续 大小为 sizeof(void *) 的内存
     context->queues =  calloc(queueCount, sizeof(void *));
+    
     if (!context->queues) {
         free(context);
         return NULL;
     }
+    
     if ([UIDevice currentDevice].systemVersion.floatValue >= 8.0) {
+        
         dispatch_qos_class_t qosClass = NSQualityOfServiceToQOSClass(qos);
+        //按 队列数量 创建 队列
         for (NSUInteger i = 0; i < queueCount; i++) {
+            //DISPATCH_QUEUE_SERIAL 或 NULL 串行队列     DISPATCH_QUEUE_CONCURRENT  并发
             dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qosClass, 0);
             dispatch_queue_t queue = dispatch_queue_create(name, attr);
             context->queues[i] = (__bridge_retained void *)(queue);
@@ -69,8 +95,10 @@ static YYDispatchContext *YYDispatchContextCreate(const char *name,
             context->queues[i] = (__bridge_retained void *)(queue);
         }
     }
+    
     context->queueCount = queueCount;
     if (name) {
+        //拷贝一个 字符串给 context -> name
          context->name = strdup(name);
     }
     return context;
@@ -100,18 +128,28 @@ static dispatch_queue_t YYDispatchContextGetQueue(YYDispatchContext *context) {
 }
 
 
+/**
+ *  根据 NSQualityOfService 创建一个 YYDispatchContext
+ *
+ *  @param qos
+ *
+ *  @return 返回一个 YYDispatchContext
+ */
 static YYDispatchContext *YYDispatchContextGetForQOS(NSQualityOfService qos) {
     static YYDispatchContext *context[5] = {0};
     switch (qos) {
+            //与用户交互的任务，这些任务通常跟UI级别的刷新相关，比如动画，这些任务需要在一瞬间完成
         case NSQualityOfServiceUserInteractive: {
             static dispatch_once_t onceToken;
             dispatch_once(&onceToken, ^{
+                //可用的处理 的 核数
                 int count = (int)[NSProcessInfo processInfo].activeProcessorCount;
-                count = count < 1 ? 1 : count > MAX_QUEUE_COUNT ? MAX_QUEUE_COUNT : count;
+                count = count < 1 ? 1 : count > MAX_QUEUE_COUNT ? MAX_QUEUE_COUNT : count; //如果不够1 就按1 如果超过32 就按32
                 context[0] = YYDispatchContextCreate("com.ibireme.yykit.user-interactive", count, qos);
             });
             return context[0];
         } break;
+            //由用户发起的并且需要立即得到结果的任务，比如滑动scroll view时去加载数据用于后续cell的显示，这些任务通常跟后续的用户交互相关，在几秒或者更短的时间内完成
         case NSQualityOfServiceUserInitiated: {
             static dispatch_once_t onceToken;
             dispatch_once(&onceToken, ^{
@@ -121,6 +159,7 @@ static YYDispatchContext *YYDispatchContextGetForQOS(NSQualityOfService qos) {
             });
             return context[1];
         } break;
+            //一些可能需要花点时间的任务，这些任务不需要马上返回结果，比如下载的任务，这些任务可能花费几秒或者几分钟的时间
         case NSQualityOfServiceUtility: {
             static dispatch_once_t onceToken;
             dispatch_once(&onceToken, ^{
@@ -130,6 +169,7 @@ static YYDispatchContext *YYDispatchContextGetForQOS(NSQualityOfService qos) {
             });
             return context[2];
         } break;
+            //这些任务对用户不可见，比如后台进行备份的操作，这些任务可能需要较长的时间，几分钟甚至几个小时
         case NSQualityOfServiceBackground: {
             static dispatch_once_t onceToken;
             dispatch_once(&onceToken, ^{
@@ -139,6 +179,7 @@ static YYDispatchContext *YYDispatchContextGetForQOS(NSQualityOfService qos) {
             });
             return context[3];
         } break;
+            //优先级介于user-initiated 和 utility，当没有 QoS信息时默认使用，开发者不应该使用这个值来设置自己的任务
         case NSQualityOfServiceDefault:
         default: {
             static dispatch_once_t onceToken;

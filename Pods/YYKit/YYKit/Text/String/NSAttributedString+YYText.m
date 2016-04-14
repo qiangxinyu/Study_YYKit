@@ -495,11 +495,13 @@ return style. _attr_;
     return [value CGAffineTransformValue];
 }
 
+
 - (NSString *)plainTextForRange:(NSRange)range {
     if (range.location == NSNotFound ||range.length == NSNotFound) return nil;
-    NSMutableString *result = [NSMutableString string];
+    NSMutableString *result = @"".mutableCopy;
     if (range.length == 0) return result;
     NSString *string = self.string;
+    
     [self enumerateAttribute:YYTextBackedStringAttributeName inRange:range options:kNilOptions usingBlock:^(id value, NSRange range, BOOL *stop) {
         YYTextBackedString *backed = value;
         if (backed && backed.string) {
@@ -726,9 +728,14 @@ return style. _attr_;
 }
 
 - (void)setAttribute:(NSString *)name value:(id)value range:(NSRange)range {
-    if (!name || [NSNull isEqual:name]) return;
-    if (value && ![NSNull isEqual:value]) [self addAttribute:name value:value range:range];
-    else [self removeAttribute:name range:range];
+    if (!name || [NSNull isEqual:name]) {
+        return;
+    }
+    if (value && ![NSNull isEqual:value]) {
+        [self addAttribute:name value:value range:range];
+    } else {
+        [self removeAttribute:name range:range];
+    }
 }
 
 - (void)removeAttributesInRange:(NSRange)range {
@@ -1329,6 +1336,12 @@ return style. _attr_;
     }];
 }
 
+
+/**
+ *  移除 不连续的 属性
+ *
+ *  @param range
+ */
 - (void)removeDiscontinuousAttributesInRange:(NSRange)range {
     NSArray *keys = [NSMutableAttributedString allDiscontinuousAttributeKeys];
     for (NSString *key in keys) {
@@ -1336,6 +1349,11 @@ return style. _attr_;
     }
 }
 
+/**
+ *  所有不连续的 属性
+ *
+ *  @return
+ */
 + (NSArray *)allDiscontinuousAttributeKeys {
     static NSMutableArray *keys;
     static dispatch_once_t onceToken;

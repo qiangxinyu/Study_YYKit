@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface YYAsyncLayer : CALayer
 /// Whether the render code is executed in background. Default is YES.
+// 是否在后台绘制代码  默认是 YES
 @property BOOL displaysAsynchronously;
 @end
 

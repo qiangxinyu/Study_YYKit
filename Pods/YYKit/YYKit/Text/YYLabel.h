@@ -349,8 +349,7 @@ NS_ASSUME_NONNULL_BEGIN
  can not finished in a vsync time (1/60 second), the old content will be still kept
  for display. You may manually clear the content by set the layer.contents to nil 
  after you update the label's properties, or you can just set this property to YES.
- 如果该值是是的，并且该层是异步的，那么它将
- 集label.layer.contents零显示前。
+ 如果该值是是的，并且该层是异步的，那么它将集label.layer.contents零显示前。
  默认值是“是”。
  当异步显示启用时，该层的内容将被
  在后台渲染处理完成后进行更新。如果渲染过程
@@ -391,8 +390,8 @@ NS_ASSUME_NONNULL_BEGIN
  
  @discussion If you control the label content only through "textLayout", then
  you may set this value to YES for higher performance.
- 忽视共同的属性（如文本、字体、文字颜色、attributedtext…）和
- 用“、”来显示内容。
+ 忽视公共的属性（如文本、字体、文字颜色、attributedtext…）和
+ 用“textLayout”来显示内容。
  默认值是“不”。
  @讨论如果你控制标签的内容只有通过“、”，然后
  您可以将此值设置为“是的更高性能。
