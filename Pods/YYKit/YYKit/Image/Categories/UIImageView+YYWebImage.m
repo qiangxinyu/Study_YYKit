@@ -99,24 +99,31 @@ static int _YYWebImageHighlightedSetterKey;
                progress:(YYWebImageProgressBlock)progress
               transform:(YYWebImageTransformBlock)transform
              completion:(YYWebImageCompletionBlock)completion {
+             
     if ([imageURL isKindOfClass:[NSString class]]) imageURL = [NSURL URLWithString:(id)imageURL];
     manager = manager ? manager : [YYWebImageManager sharedManager];
     
+    //取关联对象 setter
     _YYWebImageSetter *setter = objc_getAssociatedObject(self, &_YYWebImageSetterKey);
     if (!setter) {
+    //如果没有取到 那么创建一个 进行关联
         setter = [_YYWebImageSetter new];
         objc_setAssociatedObject(self, &_YYWebImageSetterKey, setter, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
+    
+    // 应该是一个 标记量
     int32_t sentinel = [setter cancelWithNewURL:imageURL];
     
     dispatch_async_on_main_queue(^{
         if ((options & YYWebImageOptionSetImageWithFadeAnimation) &&
             !(options & YYWebImageOptionAvoidSetImage)) {
+            //如果不是高亮  取消动画
             if (!self.highlighted) {
                 [self.layer removeAnimationForKey:_YYWebImageFadeAnimationKey];
             }
         }
         
+        //如果 url 是空  那么放 占位图
         if (!imageURL) {
             if (!(options & YYWebImageOptionIgnorePlaceHolder)) {
                 self.image = placeholder;
@@ -152,6 +159,7 @@ static int _YYWebImageHighlightedSetterKey;
                 });
             };
             
+            //这是 下载完成后的 回调
             YYWebImageCompletionBlock _completion = ^(UIImage *image, NSURL *url, YYWebImageFromType from, YYWebImageStage stage, NSError *error) {
                 __strong typeof(_self) self = _self;
                 BOOL setImage = (stage == YYWebImageStageFinished || stage == YYWebImageStageProgress) && image && !(options & YYWebImageOptionAvoidSetImage);
